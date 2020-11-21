@@ -82,7 +82,7 @@ class EventValidator:
             log.info("All types are valid")
             return True
 
-    def send_event_to_queue(self, event:dict) -> None:
+    def __send_event_to_queue(self, event:dict) -> None:
         '''
         Send events to the queue
         '''
@@ -105,7 +105,7 @@ class EventValidator:
         if self.__checkrequired(event) and self.__checkinvalid(event) and \
             self.__checktypes(event):
             try:
-                self.send_event_to_queue(event)
+                self.__send_event_to_queue(event)
 
             except Exception as e:
                 msg = 'Failed to insert event into the queue: ' + str(e)
