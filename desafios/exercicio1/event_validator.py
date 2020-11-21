@@ -109,5 +109,6 @@ class EventValidator:
 
             except Exception as e:
                 msg = 'Failed to insert event into the queue: ' + str(e)
+                log.error(msg)
         else:
             log.error("Failed to insert event into the queue")
