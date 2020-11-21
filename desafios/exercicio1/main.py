@@ -1,7 +1,8 @@
 import boto3
 from moto import mock_sqs
 
-import exercicio_1.event_validator as event_validator
+#import event_validator as event_validator
+from event_validator import EventValidator
 
 @mock_sqs
 def main(event):
@@ -9,9 +10,11 @@ def main(event):
     _SQS_CLIENT.create_queue(
         QueueName='valid-events-queue'
     )
-    event_validator._SQS_CLIENT = _SQS_CLIENT
+    #event_validator._SQS_CLIENT = _SQS_CLIENT
+
+    event_validator = EventValidator('exercicio1/schema.json', _SQS_CLIENT)
     event_validator.handler(event)
-    
+
 if __name__ == "__main__":
     event = {
         "eid": "3e628a05-7a4a-4bf3-8770-084c11601a12",
@@ -24,4 +27,5 @@ if __name__ == "__main__":
             "mailAddress": True
         }
     }
+
     main(event)
