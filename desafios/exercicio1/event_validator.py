@@ -1,66 +1,113 @@
 import json
 import boto3
+import logging
 
-with open(schema_path, 'r') as j:
-    schema = json.load(j)
+log = logging.getLogger('event_validator')
+
 class EventValidator:
-    def __init__(self, schema_path, _SQS_CLIENT) -> None:
+    '''
+    Class to validate events
+    '''
+    def __init__(self, schema_path: str, queue_name: str) -> None:
+        '''
+        Initialize EventValidator class
+        '''
+        self.__init_types()
         with open(schema_path, 'r') as j:
             self.schema = json.load(j)
 
-        self._SQS_CLIENT = _SQS_CLIENT
+        self.queue_name = queue_name
 
-    def get_schema(self) -> dict:
-        return self.schema
+    def __init_types(self) -> None:
+        '''
+        Define types to validate
+        '''
+        self.types = {'string': str, 'integer': int,
+                        'object': dict, 'boolean': bool}
 
-    def __get_required(self) -> list:
+    def __get_required(self) -> set:
+        '''
+        Get required fields
+        '''
         return set(self.schema['required'])
 
-    def __checkrequired(self, event:dict) -> (bool, str):
+    def __get_properties(self) -> dict:
+        '''
+        Get properties
+        '''
+        return self.schema['properties']
+
+    def __checkrequired(self, event:dict) -> bool:
+        '''
+        Check if all required fields are available
+        '''
         check = self.__get_required().symmetric_difference(list(event.keys()))
 
         if len(check) == 0:
-            return (True, "All required fields are filled")
+            log.info("All required fields are available")
+            return True
         else:
             missed = self.__get_required() - set(list(event.keys()))
-            if len(missed) == len(self.__get_required):
-                return (False, "Invalid fields: " + str(set(list(event.keys()))\
-                                                    - self.__get_required()))
-            else:
-                return (False, "Missed fields: " + str(missed))
+            log.error("Missed fields: " + str(missed))
+            return False
 
-    set(schema['required']).symmetric_difference(list(event.keys()))
-
-
-    def send_event_to_queue(self, event:dict, queue_name:str) -> None:
+    def __checkinvalid(self, event:dict) -> bool:
         '''
-        Responsável pelo envio do evento para uma fila
-        :param event: Evento  (dict)
-        :param queue_name: Nome da fila (str)
-        :return: None
+        Check  fields not registered in the schema
         '''
+        invalid = set(list(event.keys())) - self.__get_required()
+        if len(invalid) > 0:
+            log.error("Unrecognized field(s): " + str(invalid))
+            return False
+        else:
+            log.info("All fields are valid")
+            return True
 
+    def __checktypes(self, event:dict) -> bool:
+        '''
+        Check fields with unexpected types
+        '''
+        properties = self.__get_properties()
+        invalid = False
+        for field in list(properties.keys()):
+            if type(event[field]) != self.types[properties[field]['type']]:
+                msg = field + " invalid type. Expected " + \
+                      properties[field]['type'] + " but got " + \
+                      str(type(event[field]))
+                log.error(msg)
+                invalid = True
+        if invalid:
+            return False
+        else:
+            log.info("All types are valid")
+            return True
+
+    def send_event_to_queue(self, event:dict) -> None:
+        '''
+        Send events to the queue
+        '''
         sqs_client = boto3.client("sqs", region_name="us-east-1")
         response = sqs_client.get_queue_url(
-            QueueName=queue_name
+            QueueName=self.queue_name
         )
         queue_url = response['QueueUrl']
         response = sqs_client.send_message(
             QueueUrl=queue_url,
             MessageBody=json.dumps(event)
         )
-        print(f"Response status code: [{response['ResponseMetadata']['HTTPStatusCode']}]")
+        log.info(f"Response status code: \
+            [{response['ResponseMetadata']['HTTPStatusCode']}]")
 
-
-    def handler(self, event):
+    def handler(self, event: dict) -> None:
         '''
-        #  Função principal que é sensibilizada para cada evento
-        Aqui você deve começar a implementar o seu código
-        Você pode criar funções/classes à vontade
-        Utilize a função send_event_to_queue para envio do evento para a fila,
-            não é necessário alterá-la
+        Handle new events
         '''
-        print("Entrei no handler")
-        print("Event: ", event)
+        if self.__checkrequired(event) and self.__checkinvalid(event) and \
+            self.__checktypes(event):
+            try:
+                self.send_event_to_queue(event)
 
-
+            except Exception as e:
+                msg = 'Failed to insert event into the queue: ' + str(e)
+        else:
+            log.error("Failed to insert event into the queue")
