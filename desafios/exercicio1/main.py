@@ -16,7 +16,7 @@ def main(event):
     _SQS_CLIENT.create_queue(
         QueueName='valid-events-queue'
     )
-    #TODO: path should be arguments
+    #TODO: schema_path and queue_name should be arguments
     event_validator = EventValidator(schema_path = 'exercicio1/schema.json',
                                     queue_name = 'valid-events-queue')
     event_validator.handler(event)
