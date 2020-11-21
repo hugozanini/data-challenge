@@ -10,4 +10,4 @@ O código pode ser testado a partir do seguinte comando:
     python exercicio1/main.py
 
 
-Para verificar o funcionamento dos métodos de verificação, recomendo alterar os campos do dicionário `event` presente em `main.py`
+Para verificar o funcionamento dos métodos, recomendo alterar os campos do dicionário `event` presente em `main.py`
