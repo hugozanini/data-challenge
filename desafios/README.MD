@@ -55,7 +55,7 @@ O objetivo é que toda a arquitetura seja monitorada por uma stack `ELK (Elastic
 
 Por fim, o usuário poderá acessar todos os dados de eventos armazenados no Data warehouse para a realização de análises exploratórias dos dados e modelagem.
 
-![](./images/architecture-iti.png =750x)
+![](./images/architecture-iti.png)
 
 
 
