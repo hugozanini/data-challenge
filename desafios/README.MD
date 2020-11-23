@@ -44,16 +44,16 @@ O nó de data cleansing será responsável por consumir os dados a partir dos t�
 
 Já a etapa de data transformation, consite em converter os dados de um formato para outro, visando armazenar as informações de maneira consistente em um Data Warehouse.
 
-Esses nós podem construídos de forma customizada em python (como feito nos exercícios), ou serem construídos com base em ferramentas de criação de fluxo de ETL como o Apache Beam, ou utilizando aplicações de clouds como o GCP DataFlow ou AWS Glue.
+Esses nós podem construídos de forma customizada em python (como feito nos exercícios), a partir de ferramentas de criação de fluxo de ETL como o Apache Beam, ou utilizando aplicações de clouds como o GCP DataFlow ou AWS Glue.
 
 
-Uma vez que os dados tenham sido processados, eles serão amarmazenados em um Data warehouse. Aqui, a ideia é usar coisas como GCP BigQuery, AWS Redshift ou Apache Hive. Todas as opções são focadas em escala e processamento de grandes volumes de dados.
+Uma vez que os dados tenham sido processados, eles serão amarmazenados em um Data Warehouse. Aqui, a ideia é usar coisas como GCP BigQuery, AWS Redshift ou Apache Hive. Todas as opções são focadas em escala e processamento de grandes volumes de dados.
 
 
 O objetivo é que toda a arquitetura seja monitorada por uma stack `ELK (ElasticSearch, Logstash e Kibana)` com informações acerca de desempenho de cada uma das máquinas e containers e também logs de execução dos códigos e possíveis errors. O kibana fornece uma interface com dashboards que faclitam todo esse monitoramento.
 
 
-Por fim, o usuário poderá acessar todos os dados de eventos armazenados no Data warehouse para a realização de análises exploratórias dos dados e modelagem.
+Por fim, o usuário poderá acessar todos os dados de eventos armazenados no Data Warehouse para a realização de análises exploratórias dos dados e modelagem.
 
 ![](./images/architecture-iti.png)
 
